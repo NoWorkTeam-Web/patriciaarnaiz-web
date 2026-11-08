@@ -17,14 +17,17 @@ header{position:relative;z-index:3} .nav-toggle{display:none;border:1px solid #e
 // Public publishable key only. Supabase RLS must allow anonymous SELECT of publicado=true.
 const BASE='https://moludgaugstewycvryts.supabase.co';
 const KEY='sb_publishable_CtdmXr2tOTCNUN4svtzKAw_CId-qlAI';
-const endpoint=BASE+'/rest/v1/publicaciones?select=titulo,autores,tipo,revista_editorial,anio,doi,enlace,descripcion,idioma,destacada&publicado=eq.true&order=anio.desc.nullslast,fecha_creacion.desc';
+const endpoint=BASE+'/rest/v1/publicaciones?select=titulo,autores,tipo,revista_editorial,anio,doi,enlace,descripcion,descripcion_en,idioma,destacada&publicado=eq.true&order=anio.desc.nullslast,fecha_creacion.desc';
 let records=[];
 const byId=id=>document.getElementById(id);
 const currentLang=()=>document.documentElement.lang==='es'?'es':'en';
 const phrase=(en,es)=>currentLang()==='es'?es:en;
 function node(tag,text,cls){const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=text||'';return e;}
 function link(href,label){try{const u=new URL(href);if(!['https:','http:'].includes(u.protocol))return null;const a=node('a',label);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';return a;}catch{return null;}}
-function card(p){const a=node('article','','publication');const meta=[p.anio,currentLang()==='en' ? (categoryEN[p.tipo] || p.tipo) : p.tipo,p.revista_editorial].filter(Boolean).join(' · ');a.append(node('div',meta,'pub-meta'));a.append(node('h3',p.titulo||''));if(p.autores)a.append(node('p',p.autores));if(p.doi){const d=String(p.doi).trim();const doiLink=link('https://doi.org/'+d.replace(/^https?:\/\/doi\.org\//i,''),'DOI: '+d);if(doiLink)a.append(doiLink);}else if(p.enlace){const l=link(p.enlace,phrase('View publication','Ver publicación'));if(l)a.append(l);}if(p.descripcion)a.append(node('p',p.descripcion,'muted'));return a;}
+function card(p){const a=node('article','','publication');const meta=[p.anio,currentLang()==='en' ? (categoryEN[p.tipo] || p.tipo) : p.tipo,p.revista_editorial].filter(Boolean).join(' · ');a.append(node('div',meta,'pub-meta'));a.append(node('h3',p.titulo||''));if(p.autores)a.append(node('p',p.autores));if(p.doi){const d=String(p.doi).trim();const doiLink=link('https://doi.org/'+d.replace(/^https?:\/\/doi\.org\//i,''),'DOI: '+d);if(doiLink)a.append(doiLink);}else if(p.enlace){const l=link(p.enlace,phrase('View publication','Ver publicación'));if(l)a.append(l);}const descripcion=currentLang()==='en'
+  ? (p.descripcion_en||p.descripcion)
+  : (p.descripcion||p.descripcion_en);
+if(descripcion)a.append(node('p',descripcion,'muted'));return a;}
 function draw(){const featured=byId('featuredStatus');const f=records.filter(p=>p.destacada).slice(0,3);featured.replaceChildren();if(!f.length){featured.textContent=phrase('No featured publications selected yet.','Todavía no hay publicaciones destacadas seleccionadas.');}else{for(const p of f)featured.append(card(p));}
 const type=byId('publicType').value,year=byId('publicYear').value;const visible=records.filter(p=>(!type||p.tipo===type)&&(!year||String(p.anio)===year));byId('publicList').replaceChildren(...visible.map(card));byId('publicCount').textContent=phrase(`${visible.length} ${visible.length===1?'publication':'publications'}`,`${visible.length} ${visible.length===1?'publicación':'publicaciones'}`);if(!visible.length)byId('publicList').append(node('p',phrase('No approved publications match these filters.','No hay publicaciones aprobadas que coincidan con estos filtros.'),'muted'));}
 
