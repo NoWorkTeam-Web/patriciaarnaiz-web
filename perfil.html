@@ -32,4 +32,27 @@
 </main><footer>© Patricia Arnaiz Castro · Universidad de Las Palmas de Gran Canaria</footer>
 <script>
 const b=document.body,sw=document.getElementById('switch');let lang='es';function setLang(next){lang=next;b.className=lang;document.documentElement.lang=lang;sw.textContent=lang==='es'?'EN':'ES';sw.setAttribute('aria-label',lang==='es'?'Switch to English':'Cambiar a español');document.getElementById('homeLink').textContent=lang==='es'?'Inicio':'Home';document.getElementById('aboutLink').textContent=lang==='es'?'Sobre mí':'About';document.getElementById('researchLink').textContent=lang==='es'?'Investigación':'Research';document.getElementById('backLink').textContent=lang==='es'?'← Volver a la página principal':'← Back to the homepage'}sw.addEventListener('click',()=>setLang(lang==='es'?'en':'es'));setLang('es');
-</script></body></html>
+</script>
+<script>
+(function () {
+  function actualizarERUA() {
+    const es = document.querySelector(".erua-es");
+    const en = document.querySelector(".erua-en");
+    if (!es || !en) return;
+
+    const idioma = document.documentElement.lang
+      .toLowerCase().startsWith("es") ? "es" : "en";
+
+    es.style.display = idioma === "es" ? "" : "none";
+    en.style.display = idioma === "en" ? "" : "none";
+  }
+
+  new MutationObserver(actualizarERUA).observe(
+    document.documentElement,
+    { attributes: true, attributeFilter: ["lang"] }
+  );
+
+  actualizarERUA();
+})();
+</script>
+</body></html>
