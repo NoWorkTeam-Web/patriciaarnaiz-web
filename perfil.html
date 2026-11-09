@@ -18,12 +18,58 @@
 <section class="section" id="teaching"><div data-lang="es"><h2>Docencia e innovación</h2><p>La formación del profesorado constituye uno de los ejes de mi actividad docente. Trabajo con estudiantes que se preparan para enseñar inglés y otras materias en contextos educativos diversos, combinando fundamentos teóricos con experiencias prácticas y reflexión pedagógica.</p><p>Desde el curso 2010/2011 participo en docencia de máster y en la dirección de trabajos de fin de máster. Me interesa especialmente impulsar propuestas que incorporen el pensamiento crítico, la innovación metodológica y un uso reflexivo de la inteligencia artificial en educación.</p></div><div data-lang="en"><h2>Teaching and Innovation</h2><p>Teacher education is central to my teaching. I work with students preparing to teach English and other subjects in diverse educational contexts, combining theoretical foundations with practical experience and pedagogical reflection.</p><p>Since the 2010/2011 academic year, I have taught at master's level and supervised master's dissertations. I am particularly interested in fostering critical thinking, methodological innovation and a reflective use of artificial intelligence in education.</p></div></section>
 <section class="section" id="service"><div data-lang="es"><h2>Reconocimientos y responsabilidades académicas</h2><p>Mi trayectoria investigadora cuenta con dos sexenios de investigación reconocidos. En 2024 recibí, de forma compartida, el XII Premio «Luis Rodríguez» de Investigación en Interculturalidad.</p><p>He asumido responsabilidades de coordinación y participación académica, entre ellas actividades vinculadas a TeLL y DTrIAL, pruebas de acceso a la universidad y comisiones universitarias. Considero estas tareas una parte esencial del compromiso con la comunidad académica.</p></div><div data-lang="en"><h2>Awards and Academic Service</h2><p>My research career has been recognised with two six-year research assessment periods (sexenios). In 2024, I was a joint recipient of the 12th “Luis Rodríguez” Research Award in Interculturality.</p><p>I have undertaken coordination and academic service roles, including activities associated with TeLL and DTrIAL, university entrance examinations and university committees. I regard this work as an essential part of my commitment to the academic community.</p></div></section>
 <section class="section" id="international"><div data-lang="es"><h2>Actividad internacional</h2><p>La cooperación internacional ha enriquecido mi manera de entender la enseñanza y la investigación. He colaborado con equipos y universidades de distintos países y he participado en iniciativas europeas relacionadas con la educación lingüística y bilingüe.</p><p>Entre estas experiencias destaca mi labor de coordinación en la ULPGC del proyecto Erasmus+ Playing Beyond CLIL, así como estancias académicas en Córdoba (2012) y A Coruña (2025).</p></div><div data-lang="en"><h2>International Activity</h2><p>International cooperation has enriched my approach to teaching and research. I have collaborated with teams and universities in different countries and participated in European initiatives related to language and bilingual education.</p><p>These experiences include coordinating the Erasmus+ Playing Beyond CLIL project at ULPGC, as well as academic stays in Córdoba (2012) and A Coruña (2025).</p></div></section>
+<section class="section" id="resources" hidden><div data-lang="es"><h2>Recursos y materiales</h2><div class="dynamic-copy"></div></div><div data-lang="en"><h2>Resources and Materials</h2><div class="dynamic-copy"></div></div></section>
 <div class="links"><a href="https://orcid.org/0000-0001-5987-8254" target="_blank" rel="noopener">ORCID</a><a href="https://accedacris.ulpgc.es/cris/rp/rp00865" target="_blank" rel="noopener">accedaCRIS · ULPGC</a><a href="https://erua-eui.eu/" target="_blank" rel="noopener">ERUA</a></div><a class="back" href="index.html" id="backLink">← Volver a la página principal</a>
 </div>
 
 </main><footer>© Patricia Arnaiz Castro · Universidad de Las Palmas de Gran Canaria</footer>
 <script>
 const b=document.body,sw=document.getElementById('switch');let lang='es';function setLang(next){lang=next;b.className=lang;document.documentElement.lang=lang;sw.textContent=lang==='es'?'EN':'ES';sw.setAttribute('aria-label',lang==='es'?'Switch to English':'Cambiar a español');document.getElementById('homeLink').textContent=lang==='es'?'Inicio':'Home';document.getElementById('aboutLink').textContent=lang==='es'?'Sobre mí':'About';document.getElementById('researchLink').textContent=lang==='es'?'Investigación':'Research';document.getElementById('backLink').textContent=lang==='es'?'← Volver a la página principal':'← Back to the homepage'}sw.addEventListener('click',()=>setLang(lang==='es'?'en':'es'));setLang('es');
+</script>
+
+<script>
+/* Solo se consultan filas publicadas; los borradores nunca se solicitan. */
+const API_BASE='https://moludgaugstewycvryts.supabase.co';
+const PUBLIC_KEY='sb_publishable_CtdmXr2tOTCNUN4svtzKAw_CId-qlAI';
+const SECTIONS={biografia:'about',investigacion:'research',docencia:'teaching',actividad_academica:'service',recursos:'resources'};
+function renderText(container, value){
+  const paragraphs=String(value).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+  if(!paragraphs.length)return false;
+  container.replaceChildren();
+  for(const paragraph of paragraphs){const p=document.createElement('p');p.textContent=paragraph;container.appendChild(p);}
+  return true;
+}
+async function loadPublishedProfile(){
+  try{
+    const url=API_BASE+'/rest/v1/contenido_academico?select=seccion,titulo_es,titulo_en,contenido_es,contenido_en&publicado=eq.true';
+    const response=await fetch(url,{headers:{'apikey':PUBLIC_KEY,'Accept':'application/json'}});
+    if(!response.ok)throw new Error('No se pudo consultar el contenido publicado');
+    const rows=await response.json();
+    if(!Array.isArray(rows))return;
+    for(const item of rows){
+      const sectionId=SECTIONS[item.seccion];if(!sectionId)continue;
+      const section=document.getElementById(sectionId);if(!section)continue;
+      // No se reemplaza el contenido original hasta disponer de ambos idiomas.
+      if(!String(item.contenido_es??'').trim()||!String(item.contenido_en??'').trim())continue;
+      const es=section.querySelector('[data-lang="es"]');
+      const en=section.querySelector('[data-lang="en"]');
+      if(!es||!en)continue;
+      for(const [container,title,content] of [[es,item.titulo_es,item.contenido_es],[en,item.titulo_en,item.contenido_en]]){
+        const heading=container.querySelector('h2');
+        if(heading&&String(title??'').trim())heading.textContent=title.trim();
+        // Los contenidos son texto plano: evita ejecutar HTML introducido en el editor.
+        let body=container.querySelector('.dynamic-copy');
+        if(!body){body=document.createElement('div');body.className='dynamic-copy';
+          for(const p of Array.from(container.querySelectorAll('p')))p.remove();
+          container.appendChild(body);
+        }
+        renderText(body,content);
+      }
+      if(sectionId==='resources')section.hidden=false;
+    }
+  }catch(error){console.warn('Se conserva el perfil estático:',error.message);}
+}
+loadPublishedProfile();
 </script>
 
 </body></html>
